@@ -11,7 +11,7 @@ class _MySpalshScreenState extends State<MySpalshScreen> {
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
-      seconds: 2,
+      seconds: 3,
       navigateAfterSeconds: Home(),
       title: Text(
         'Dog and Cat Spalsh',
