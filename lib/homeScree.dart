@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:tflite/tflite.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -7,6 +10,67 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool _loadingVar = true;
+  File _imageVar;
+  List _outputVar;
+  final picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    loadModel().then((value) {
+      setState(() {});
+    });
+  }
+
+  distinguishImage(File image) async {
+    var outputImage = await Tflite.runModelOnImage(
+        path: image.path,
+        numResults: 2,
+        threshold: 0.5,
+        imageMean: 127.5,
+        imageStd: 127.5);
+    setState(() {
+      _outputVar = outputImage;
+      _loadingVar = false;
+    });
+  }
+
+  loadModel() async {
+    await Tflite.loadModel(
+        model: 'assests/model_unquant.tflite', labels: 'assests/labels.txt');
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    Tflite.close();
+  }
+
+  pickImageCamera() async {
+    var selImage = await picker.getImage(source: ImageSource.camera);
+    if (selImage == null) {
+      return null;
+    }
+    setState(() {
+      _imageVar = File(selImage.path);
+    });
+
+    distinguishImage(_imageVar);
+  }
+
+  pickImageGallery() async {
+    var selImage = await picker.getImage(source: ImageSource.gallery);
+    if (selImage == null) {
+      return null;
+    }
+    setState(() {
+      _imageVar = File(selImage.path);
+    });
+
+    distinguishImage(_imageVar);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
